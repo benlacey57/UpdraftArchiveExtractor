@@ -72,7 +72,9 @@ DATE=$(date +"%Y-%m-%d")
 mkdir -p "$LOGS_DIR/$DATE"
 
 # Log the start of the script
-log_message "Starting extraction script for server: $SERVER_FOLDER..." "$LOGS_DIR/$DATE/${SERVER_FOLDER}.log"
+echo ""
+log_message "Starting extraction script for server: $SERVER_FOLDER" "$LOGS_DIR/$DATE/${SERVER_FOLDER}.log"
+echo ""
 
 # Loop through each domain subfolder under the server
 for domain in "$BACKUP_DIR"/*; do
@@ -80,10 +82,10 @@ for domain in "$BACKUP_DIR"/*; do
     DOMAIN_NAME=$(basename "$domain")
     
     # Set the domain-specific log file
-    LOG_FILE="$LOGS_DIR/$DATE/${SERVER_FOLDER}-${DOMAIN_NAME}.log"
+    LOG_FILE="$LOGS_DIR/$DATE/${SERVER_FOLDER}/${DOMAIN_NAME}.log"
     
     # Log the start of extraction for the domain
-    log_message "Processing domain: $DOMAIN_NAME..." "$LOG_FILE"
+    log_message "Processing domain: $DOMAIN_NAME" "$LOG_FILE"
     
     # Get the backup files for this domain
     for archive in "$domain"/*; do
@@ -97,7 +99,7 @@ for domain in "$BACKUP_DIR"/*; do
         mkdir -p "$extract_path"
         
         # Extract the archive into this folder
-        log_message "Extracting $archive to $extract_path..." "$LOG_FILE"
+        log_message "Extracting $archive to $extract_path (please wait)" "$LOG_FILE"
         
         if [[ $archive == *.zip ]]; then
           unzip "$archive" -d "$extract_path" >> "$LOG_FILE" 2>&1
@@ -106,15 +108,15 @@ for domain in "$BACKUP_DIR"/*; do
         elif [[ $archive == *.gz ]]; then
           gunzip -c "$archive" > "$extract_path/$(basename "$filename" .gz)" >> "$LOG_FILE" 2>&1
         else
-          log_message "Unsupported file format: $archive" "$LOG_FILE"
+          log_message "Error: Unsupported file format: $archive" "$LOG_FILE"
           continue
         fi
         
         # Check if extraction was successful
         if [ $? -eq 0 ]; then
-          log_message "Successfully extracted $archive." "$LOG_FILE"
+          log_message "Success: Completed the unzip $archive." "$LOG_FILE"
         else
-          log_message "Failed to extract $archive!" "$LOG_FILE"
+          log_message "Error: Failed to unzip $archive!" "$LOG_FILE"
           continue
         fi
       fi
@@ -124,13 +126,14 @@ for domain in "$BACKUP_DIR"/*; do
     log_message "Cleaning up old extracted files for domain: $DOMAIN_NAME..." "$LOG_FILE"
     find "$EXTRACTED_DIR/$DOMAIN_NAME" -mindepth 1 -mtime +1 -delete
     if [ $? -eq 0 ]; then
-      log_message "Old extracted files cleaned successfully for domain: $DOMAIN_NAME." "$LOG_FILE"
+      log_message "Success: Old extracted files cleaned successfully for domain: $DOMAIN_NAME." "$LOG_FILE"
     else
-      log_message "Failed to clean old extracted files for domain: $DOMAIN_NAME!" "$LOG_FILE"
+      log_message "Error: Failed to clean old files for domain: $DOMAIN_NAME!" "$LOG_FILE"
     fi
   fi
 done
 
 # Log the end of the script
-log_message "Extraction script finished for server: $SERVER_FOLDER." "$LOGS_DIR/$DATE/${SERVER_FOLDER}.log"
+echo ""
+log_message "Extraction finished for $SERVER_FOLDER." "$LOGS_DIR/$DATE/${SERVER_FOLDER}.log"
 exit 0
