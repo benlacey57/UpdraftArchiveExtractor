@@ -11,7 +11,7 @@ fi
 SERVER_FOLDER="$1"                              # Server folder name passed as an argument
 BACKUP_DIR="/files/$SERVER_FOLDER"              # Backup directory with subfolders for each domain
 LOGS_DIR="/logs"                        # Path to store logs
-EXTRACTED_DIR="/extracted/$SERVER_FOLDER" # Path for extracted files
+EXTRACTED_DIR="/archives/$SERVER_FOLDER" # Path for extracted files
 DATE=$(date +"%Y-%m-%d")
 
 # Log file structure: logs/date:mysql_format/server_name-domain_name.log
